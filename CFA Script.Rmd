@@ -1,0 +1,238 @@
+---
+title: "CFA Script"
+output: html_document
+date: "2024-07-10"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Dr Paul Christiansen
+CFA
+
+Packages to install- only needs to be done once.
+
+```{r}
+
+#install.packages("lavaan")      ### does LAtent VAriable ANalysis see https://lavaan.ugent.be/
+#install.packages("lavaanPlot")  ### make plots https://cran.r-project.org/web/packages/lavaanPlot/vignettes/Intro_to_lavaanPlot.html
+library(lavaan)
+library(lavaanPlot)
+```
+
+Turn off scientfic notation
+
+```{r}
+options(scipen = 999)
+```
+
+Read in the data set
+
+```{r}
+
+cfadata <- read.csv("C:/Users/kiera/Downloads/cfaimputedasfactor.csv")
+View(cfadata)   
+str(cfadata)
+```
+
+
+
+
+
+
+Model 1: EFA1 suggested
+```{r}
+
+###fit your model, the model need to be within 'single quotations' and will only run if text is green! 
+###F1 is simply the name I have given the the factor you can call it whatever you like 
+### The =~ (equals tilde) symbol means measured by so factor one is measured by ATGC1, ATGC2 and ATGC3 and so on
+
+model1 <- 'NeutAnx=~NIES4+NIES9+NIES10+NIES11+NIES12+NIES16+NIES17+NIES18+NIES19
+AnxSig=~NIES1+NIES2+NIES7+NIES8+NIES13+NIES14+NIES15+NIES20
+DL=~NIES3+NIES5+NIES6'
+
+  
+fit1 <- cfa(model1, estimator = "WLSMV", data = cfadata, std.lv = TRUE)    
+
+fit1 <- cfa(model1, estimator = "WLSMV", data = cfadata, std.lv = TRUE,
+
+ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6")) #### fit the above model             
+summary(fit1, standardized=TRUE, ci=TRUE, fit.measures=TRUE) #### display the results. Standardised = TRUE gives beta values (std.all column), ci=TRUE gives 95%CIs
+modindices(fit1, minimum.value = 10, sort = TRUE)
+
+```
+
+Model 2: EFA1 Adapted 
+```{r}
+model2 <- 'NeutAnx=~NIES9+NIES10+NIES11+NIES12+NIES16+NIES17+NIES18+NIES19
+AnxSig=~NIES1+NIES2+NIES7+NIES8+NIES13+NIES14+NIES15+NIES20
+DL=~NIES4+NIES3+NIES5+NIES6'
+
+  
+fit2 <- cfa(model2, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))                                 
+summary(fit2, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit2, minimum.value = 10, sort = TRUE)
+```
+
+Model 3: EFA2 suggested 
+```{r}
+model3 <- 'Anx=~NIES1+NIES2+NIES7+NIES8+NIES13+NIES14+NIES15+NIES20
+Gastric=~NIES4+NIES9+NIES10+NIES16+NIES17
+Thirst=~NIES3+NIES5+NIES6+NIES11+NIES12+NIES18+NIES19'
+
+  
+fit3 <- cfa(model3, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))                                 
+summary(fit3, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit3, minimum.value = 10, sort = TRUE)
+```
+
+Model 4: EFA2 Adapted
+```{r}
+model4 <- 'Anx=~NIES1+NIES2+NIES7+NIES8+NIES13+NIES14+NIES15+NIES20
+Gastric=~NIES3+NIES4+NIES9+NIES10+NIES16+NIES17
+Thirst=~NIES5+NIES6+NIES11+NIES12+NIES18+NIES19'
+
+  
+fit4 <- cfa(model4, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))
+summary(fit4, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit4, minimum.value = 10, sort = TRUE)
+```
+Model 5: EFA2 Adapted correlated residuals added 
+```{r}
+model5 <- 'Anx=~NIES1+NIES2+NIES7+NIES8+NIES13+NIES14+NIES15+NIES20
+Gastric=~NIES3+NIES4+NIES9+NIES10+NIES16+NIES17
+Other=~NIES5+NIES6+NIES11+NIES12+NIES18+NIES19
+NIES7 ~~ NIES8'
+
+  
+fit5 <- cfa(model5, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))
+summary(fit5, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit5, minimum.value = 10, sort = TRUE)
+```
+
+
+Model 6: EFA2 Adapted pain removed
+```{r}
+model6 <- 'Anx=~NIES1+NIES2+NIES7+NIES8+NIES14+NIES15
+Gastric=~NIES3+NIES4+NIES9+NIES10+NIES16+NIES17
+Thirst=~NIES5+NIES6+NIES11+NIES12+NIES18+NIES19'
+
+  
+fit6 <- cfa(model6, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))
+summary(fit6, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit6, minimum.value = 10, sort = TRUE)
+
+```
+
+Model 7: EFA2 Adapted and don't like removed
+```{r}
+model7 <- 'Anx=~NIES7+NIES8+NIES13+NIES14+NIES15+NIES20
+Gastric=~NIES9+NIES10+NIES16+NIES17
+Thirst=~NIES11+NIES12+NIES18+NIES19'
+
+  
+fit7 <- cfa(model7, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))                                 
+summary(fit7, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit7, minimum.value = 10, sort = TRUE)
+```
+
+Model 8: 2 FACTOR
+```{r}
+model8 <- 'Anx=~NIES1+NIES2+NIES7+NIES8+NIES13+NIES14+NIES15+NIES20
+Neut=~NIES3+NIES4+NIES5+NIES6+NIES9+NIES10+NIES11+NIES12+NIES16+NIES17+NIES18+NIES19'
+
+  
+fit8 <- cfa(model8, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))                                 
+summary(fit8, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit8, minimum.value = 10, sort = TRUE)
+```
+Model 9: 1-factor model
+```{r}
+model9 <- 'Fact=~NIES1+NIES2+NIES7+NIES8+NIES13+NIES14+NIES15+NIES20+NIES3+NIES4+NIES5+NIES6+NIES9+NIES10+NIES11+NIES12+NIES16+NIES17+NIES18+NIES19'
+
+  
+fit9 <- cfa(model9, estimator = "WLSMV", data = cfadata, std.lv = TRUE, ordered = c("NIES4","NIES9","NIES10","NIES11","NIES12","NIES16",
+
+"NIES17","NIES18","NIES19","NIES1","NIES2","NIES7",
+
+"NIES8","NIES13","NIES14","NIES15","NIES20","NIES3","NIES5","NIES6"))                                 
+summary(fit9, standardized=TRUE, ci=TRUE, fit.measures=TRUE)
+modindices(fit9, minimum.value = 10, sort = TRUE)
+```
+
+
+########Note on fitting methods
+
+#### this fits a maximum likelihood model by default  in code it looks like
+###fit <- cfa(model,estimator = "ML", data = ATGC)
+
+## Lavaan alows lots of different estimators
+# "GLS": generalized least squares. For complete data only.
+#"WLS": weighted least squares (sometimes called ADF estimation). For complete data only.
+#"DWLS": diagonally weighted least squares
+#"ULS": unweighted least squares
+
+#Many estimators have 'robust' variants, meaning that they provide robust standard errors and a scaled test:
+#"MLM": maximum likelihood estimation with robust standard errors and a Satorra-Bentler scaled test
+#statistic. For complete data only.
+#"MLMVS": maximum likelihood estimation with robust standard errors and a mean- and variance adjusted
+#test statistic (aka the Satterthwaite approach). For complete data only.
+#"MLMV": maximum likelihood estimation with robust standard errors and a mean- and variance adjusted
+#test statistic (using a scale-shifted approach). For complete data only.
+#"MLF": for maximum likelihood estimation with standard errors based on the first-order derivatives, and
+#conventional test statistic. For both complete and incomplete data.
+#"MLR": maximum likelihood estimation with robust (Huber-White) standard errors and a scaled test
+#statistic that is (asymptotically) equal to the Yuan-Bentler test statistic. For both complete and incomplete data
+
+#modification indicies tell you if your model can be improved by using covariances, 
+#a modification index is the chi squared reduction adding a covariance will have, 
+# we have set it to ten. Covariance should only be added were logical  
+
+
+##################################plot
+
+#################
+####this package allows us creae diagrams
+### all of these things are standard, you fit the model you have created 'fit2' in this case. I have asked for coefficients
+### coefs=T and for these to be standardised stand =2.
+### if you want covariances between facts add ,covs=T, 
+
+```{r}
+
+
+lavaanPlot(model = fit4, node_options = list(shape = "box", fontname = "Helvetica"), edge_options = list(color = "black"),
+           coefs = T, stand=T, covs = T)
+```
